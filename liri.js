@@ -2,8 +2,12 @@ var fs = require("fs");
 var keys = require("./keys.js");
 var inq = require("inquirer");
 var twitter = require("twitter");
-var twitterKeys =  new twitter(keys.twitterKeys);
-console.log("Twitter Keys: " + twitterKeys);
+var twitterKeys =  new twitter({
+	consumer_key: keys.twitterKeys.consumer_key,
+	consumer_secret: keys.twitterKeys.consumer_secret,
+	access_token_key: keys.twitterKeys.access_token_key,
+	access_token_secret: keys.twitterKeys.access_token_secret
+});
 
 inq.prompt([
 	{
@@ -13,7 +17,6 @@ inq.prompt([
 		name: "userCommand"
 	}
 	]).then(function(response){
-		console.log("You selected: " + response.userCommand);
 
 		switch(response.userCommand){
 
@@ -21,19 +24,13 @@ inq.prompt([
 			// 		  CHECK TWEETS
 			// ==========================
 
-			case "Check Tweets":
-				twitterKeys.get('favorites/list', function(tweets, response) {
-					console.log(tweets);
+			case "Check Tweets":	
+			var params = {screen_name: 'earthworm_ghost'};
+				twitterKeys.get('statuses/user_timeline', params, function(error, tweets, response) {
+				for(i = 0; i < 20; i++){
+					console.log("Tweet " + (i+1)   + ": " + tweets[i].text);
+					}
 				});	
-
-
-				// console.log("Logging from switch- Twitter");
-				// var twitterUser = {screen_name: "earthworm_ghost"};
-				// twitterKeys.get("statuses/user_timeline", twitterUser, function(error, tweets, response){
-				// 	if(error){
-				// 		console.log(error);
-				// 	}
-				// });
 			break;
 
 			// ==========================
