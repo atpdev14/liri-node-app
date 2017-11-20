@@ -17,36 +17,20 @@ var spotifyKeys = new spotify({
 
 var omdb = require("omdb");
 
-inq.prompt([
-	{
-		type: "list",
-		message: "What would you like to do?",
-		choices: ["Check Tweets", "Look up a song on Spotify", "Look up a movie", "Do what it says"],
-		name: "userCommand"
-	}
-	]).then(function(response){
-
-		switch(response.userCommand){
-
-			// ==========================
-			// 		  CHECK TWEETS
-			// ==========================
-
-			case "Check Tweets":	
-			var params = {screen_name: 'earthworm_ghost'};
+function checkTweets(){
+	var params = {screen_name: 'earthworm_ghost'};
 				twitterKeys.get('statuses/user_timeline', params, function(error, tweets, response) {
 				for(i = 0; i < 20; i++){
 					console.log("Tweet " + (i+1)   + ": " + tweets[i].text);
 					}
 				});	
-			break;
+};
 
-			// ==========================
-			// 			SPOTIFY
-			// ==========================
 
-			case "Look up a song on Spotify":
-				inq.prompt([
+
+
+function searchSpotify() {
+	inq.prompt([
 					{
 						type: "input",
 						message: "What song would you like to search for?",
@@ -58,27 +42,25 @@ inq.prompt([
   							if (err) {
     							return console.log('Error occurred: ' + err);
   							}
+  							
 							for(var i=0; i < 10; i++){
-
 								var songInfo = {
 									songName: data.tracks.items[i].name,
 									artist: data.tracks.items[i].album.artists[0].name,
 									album: data.tracks.items[i].album.name,
 									url: data.tracks.items[i].external_urls.spotify
 								};
-
+							console.log("\n");
 							console.log("Song Info: " + JSON.stringify(songInfo, null, 2));
 							};
 						})
 					});
-			break;
-			
-			// ==========================
-			// 			MOVIE
-			// ==========================
 
-			case "Look up a movie":
-				inq.prompt([
+};
+
+
+function searchMovie() {
+		inq.prompt([
 					{
 						type: "input",
 						message: "What movie would you like to search for?",
@@ -102,15 +84,80 @@ inq.prompt([
 							console.log("\n");
 						});
 					});
+};
+
+
+function callFunction(arg){
+	if(arg === "Check Tweets"){
+		checkTweets();
+	}else if(arg === "Look up a song on Spotify"){
+		searchSpotify();
+	}else if(arg === "Look up a movie"){
+		searchMovie();
+	}else {
+		console.log("Not a valid command.");
+	}
+};
+
+
+// ==============================================================================
+// 		 				 Inquirer Function
+// ==============================================================================
+
+
+ inq.prompt([
+	{
+		type: "list",
+		message: "What would you like to do?",
+		choices: ["Check Tweets", "Look up a song on Spotify", "Look up a movie", "Read from random.txt"],
+		name: "userCommand"
+	}
+	]).then(function(response){
+
+		switch(response.userCommand){
+
+			// ==========================
+			// 		  CHECK TWEETS
+			// ==========================
+
+			case "Check Tweets":	
+			 	checkTweets();
+			break;
+
+			// ==========================
+			// 			SPOTIFY
+			// ==========================
+
+			case "Look up a song on Spotify":
+				searchSpotify()
 			break;
 			
 			// ==========================
-			// 		DO WHAT IT SAYS
+			// 			MOVIE
 			// ==========================
 
-			case "Do what it says":
-				console.log("Logging from switch- Do what it says");
+			case "Look up a movie":
+				searchMovie();
 			break;
+			
+			// ==========================
+			// 	  Read from Random.txt
+			// ==========================
+
+			case "Read from random.txt":
+				fs.readFile("random.txt", "utf8", function(error, data){
+					if(error){
+						return console.log(error);
+					}
+					var dataArr = data.split(",");
+					var command = dataArr[0];
+					var searchTerm = dataArr[1];
+					console.log(command);
+					callFunction(command);
+					
+
+				});
+			break; 
 		}; 
 
 	});
